@@ -16,6 +16,12 @@ class SearchResultsScreen extends StatefulWidget {
 
 class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  
+  // Sort and Filter States
+  String _sortBy = 'Recommended';
+  String _vegFilter = 'All'; // All, Veg, Non-Veg
+  bool _freeDelivery = false;
+  bool _hasOffers = false;
 
   @override
   void initState() {
@@ -29,6 +35,111 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
     super.dispose();
   }
 
+  Widget _buildFilterBar() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: Row(
+        children: [
+          // Sort Dropdown button
+          Theme(
+            data: Theme.of(context).copyWith(
+              cardColor: Colors.white,
+              dividerColor: AppTheme.border,
+            ),
+            child: PopupMenuButton<String>(
+              initialValue: _sortBy,
+              onSelected: (val) => setState(() => _sortBy = val),
+              itemBuilder: (context) => [
+                'Recommended',
+                'Rating',
+                'Price Low to High',
+                'Price High to Low',
+              ].map((val) => PopupMenuItem(value: val, child: Text(val, style: const TextStyle(fontSize: 13)))).toList(),
+              child: Chip(
+                backgroundColor: _sortBy != 'Recommended' ? AppTheme.orangeLight : Colors.white,
+                side: BorderSide(color: _sortBy != 'Recommended' ? AppTheme.orange : AppTheme.border),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                label: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.sort, size: 14, color: _sortBy != 'Recommended' ? AppTheme.orange : AppTheme.textSecondary),
+                    const SizedBox(width: 4),
+                    Text(_sortBy, style: TextStyle(fontSize: 12, color: _sortBy != 'Recommended' ? AppTheme.orange : AppTheme.textPrimary, fontWeight: FontWeight.w600)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          // Veg/Non-veg Chip
+          ChoiceChip(
+            label: Text(_vegFilter == 'All' ? 'Veg/Non-Veg' : _vegFilter),
+            selected: _vegFilter != 'All',
+            selectedColor: AppTheme.orangeLight,
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            labelStyle: TextStyle(
+              fontSize: 12,
+              color: _vegFilter != 'All' ? AppTheme.orange : AppTheme.textPrimary,
+              fontWeight: _vegFilter != 'All' ? FontWeight.bold : FontWeight.normal,
+            ),
+            side: BorderSide(color: _vegFilter != 'All' ? AppTheme.orange : AppTheme.border),
+            onSelected: (selected) {
+              setState(() {
+                if (_vegFilter == 'All') {
+                  _vegFilter = 'Veg';
+                } else if (_vegFilter == 'Veg') {
+                  _vegFilter = 'Non-Veg';
+                } else {
+                  _vegFilter = 'All';
+                }
+              });
+            },
+            showCheckmark: false,
+          ),
+          const SizedBox(width: 8),
+
+          // Free Delivery Chip
+          FilterChip(
+            label: const Text('Free Delivery'),
+            selected: _freeDelivery,
+            selectedColor: AppTheme.orangeLight,
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            labelStyle: TextStyle(
+              fontSize: 12,
+              color: _freeDelivery ? AppTheme.orange : AppTheme.textPrimary,
+              fontWeight: _freeDelivery ? FontWeight.bold : FontWeight.normal,
+            ),
+            side: BorderSide(color: _freeDelivery ? AppTheme.orange : AppTheme.border),
+            onSelected: (val) => setState(() => _freeDelivery = val),
+            showCheckmark: false,
+          ),
+          const SizedBox(width: 8),
+
+          // Offers Chip
+          FilterChip(
+            label: const Text('Offers'),
+            selected: _hasOffers,
+            selectedColor: AppTheme.orangeLight,
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            labelStyle: TextStyle(
+              fontSize: 12,
+              color: _hasOffers ? AppTheme.orange : AppTheme.textPrimary,
+              fontWeight: _hasOffers ? FontWeight.bold : FontWeight.normal,
+            ),
+            side: BorderSide(color: _hasOffers ? AppTheme.orange : AppTheme.border),
+            onSelected: (val) => setState(() => _hasOffers = val),
+            showCheckmark: false,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = AppStateProvider.of(context);
@@ -39,15 +150,55 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
       final matchesName = food.name.toLowerCase().contains(query);
       final matchesTag = food.tags.any((t) => t.toLowerCase() == query);
       final matchesCategory = food.category.toLowerCase().contains(query);
-      return matchesName || matchesTag || matchesCategory;
+      bool matchesSearch = matchesName || matchesTag || matchesCategory;
+
+      if (!matchesSearch) return false;
+
+      // Veg Filter
+      if (_vegFilter == 'Veg') {
+        final isVeg = food.tags.any((t) => t.toLowerCase() == 'vegetarian' || t.toLowerCase() == 'veg');
+        if (!isVeg) return false;
+      } else if (_vegFilter == 'Non-Veg') {
+        final isVeg = food.tags.any((t) => t.toLowerCase() == 'vegetarian' || t.toLowerCase() == 'veg');
+        if (isVeg) return false;
+      }
+
+      return true;
     }).toList();
+
+    // Sort food items
+    if (_sortBy == 'Price Low to High') {
+      filteredFoods.sort((a, b) => a.price.compareTo(b.price));
+    } else if (_sortBy == 'Price High to Low') {
+      filteredFoods.sort((a, b) => b.price.compareTo(a.price));
+    } else if (_sortBy == 'Rating') {
+      filteredFoods.sort((a, b) => b.rating.compareTo(a.rating));
+    }
 
     // Filter restaurants
     final filteredRestaurants = state.restaurants.where((rest) {
       final matchesName = rest.name.toLowerCase().contains(query);
       final matchesCategory = rest.category.toLowerCase().contains(query);
-      return matchesName || matchesCategory;
+      bool matchesSearch = matchesName || matchesCategory;
+
+      if (!matchesSearch) return false;
+
+      if (_freeDelivery && rest.deliveryFee > 0) {
+        return false;
+      }
+
+      if (_hasOffers) {
+        // Mock that restaurants r1, r2, r5 have offers
+        if (rest.id != 'r1' && rest.id != 'r2' && rest.id != 'r5') return false;
+      }
+
+      return true;
     }).toList();
+
+    // Sort restaurants
+    if (_sortBy == 'Rating') {
+      filteredRestaurants.sort((a, b) => b.rating.compareTo(a.rating));
+    }
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -102,6 +253,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> with SingleTi
                 ],
               ),
             ),
+
+            // Horizontal Filter & Sort Bar
+            _buildFilterBar(),
+            const SizedBox(height: 8),
 
             // Tab bar
             Container(

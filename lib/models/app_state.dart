@@ -64,6 +64,24 @@ class FoodItem {
   });
 }
 
+class MembershipPlan {
+  final String id;
+  final String name;
+  final String price;
+  final String pointsMultiplier;
+  final String freeDelivery;
+  final String discounts;
+
+  MembershipPlan({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.pointsMultiplier,
+    required this.freeDelivery,
+    required this.discounts,
+  });
+}
+
 class CartItem {
   final FoodItem foodItem;
   int quantity;
@@ -86,17 +104,384 @@ class CartItem {
   }
 }
 
+class Address {
+  final String id;
+  final String label; // Home, Work, Custom
+  final String street;
+  final String city;
+  final String zip;
+  final String fullAddress;
+  final String deliveryInstructions;
+  final double lat;
+  final double lng;
+
+  Address({
+    required this.id,
+    required this.label,
+    required this.street,
+    required this.city,
+    required this.zip,
+    required this.fullAddress,
+    this.deliveryInstructions = '',
+    this.lat = 28.6,
+    this.lng = 77.1,
+  });
+}
+
+class WalletTransaction {
+  final String id;
+  final String title;
+  final String date;
+  final double amount;
+  final bool isCredit;
+
+  WalletTransaction({
+    required this.id,
+    required this.title,
+    required this.date,
+    required this.amount,
+    required this.isCredit,
+  });
+}
+
+class SupportTicket {
+  final String ticketNumber;
+  final String subject;
+  final String category;
+  final String priority; // High, Medium, Low
+  final String status; // Open, In Progress, Resolved
+  final String date;
+  final String assignedStaff;
+  final String resolution;
+  final String internalNotes;
+  final List<String> messages;
+
+  SupportTicket({
+    required this.ticketNumber,
+    required this.subject,
+    required this.category,
+    required this.priority,
+    required this.status,
+    required this.date,
+    this.assignedStaff = 'Support Agent',
+    this.resolution = '',
+    this.internalNotes = '',
+    required this.messages,
+  });
+}
+
+class DeviceSession {
+  final String id;
+  final String deviceName;
+  final String location;
+  final String lastActive;
+  final bool isCurrent;
+
+  DeviceSession({
+    required this.id,
+    required this.deviceName,
+    required this.location,
+    required this.lastActive,
+    this.isCurrent = false,
+  });
+}
+
 class AppState extends ChangeNotifier {
   // Authentication State
   bool _isLoggedIn = false;
   bool get isLoggedIn => _isLoggedIn;
 
   final UserProfile _user = UserProfile(
-    name: 'Katty Berry',
-    email: 'kattyberry@gmail.com',
-    photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    name: 'Rohan Sharma',
+    email: 'rohansharma@gmail.com',
+    photo: 'https://images.unsplash.com/photo-1607990283143-e81e7a2c93ab?w=150',
   );
   UserProfile get user => _user;
+
+  // Wallet State
+  double _walletBalance = 350.0;
+  double get walletBalance => _walletBalance;
+
+  final List<WalletTransaction> _walletTransactions = [
+    WalletTransaction(id: 'wt1', title: 'Refund for ORD-5541', date: '08 July 2026', amount: 240.0, isCredit: true),
+    WalletTransaction(id: 'wt2', title: 'Cashback Earned', date: '12 July 2026', amount: 30.0, isCredit: true),
+    WalletTransaction(id: 'wt3', title: 'Referral Bonus', date: '15 July 2026', amount: 100.0, isCredit: true),
+    WalletTransaction(id: 'wt4', title: 'Added via UPI', date: '18 July 2026', amount: 200.0, isCredit: true),
+    WalletTransaction(id: 'wt5', title: 'Spent on ORD-7612', date: '16 July 2026', amount: 220.0, isCredit: false),
+  ];
+  List<WalletTransaction> get walletTransactions => _walletTransactions;
+
+  // Address State
+  final List<Address> _addresses = [
+    Address(
+      id: 'a1',
+      label: 'Home',
+      street: '742 Evergreen Terrace',
+      city: 'Springfield',
+      zip: '49001',
+      fullAddress: '742 Evergreen Terrace, Springfield',
+      deliveryInstructions: 'Leave with guard at the gate',
+      lat: 28.6139,
+      lng: 77.2090,
+    ),
+    Address(
+      id: 'a2',
+      label: 'Work',
+      street: '100 Tech Park, Block C',
+      city: 'Springfield',
+      zip: '49002',
+      fullAddress: '100 Tech Park, Block C, Springfield',
+      deliveryInstructions: 'Deliver to 4th floor reception',
+      lat: 28.6250,
+      lng: 77.2200,
+    ),
+  ];
+  Address? _selectedAddress;
+  List<Address> get addresses => _addresses;
+  Address? get selectedAddress => _selectedAddress ?? (_addresses.isNotEmpty ? _addresses.first : null);
+
+  // Veg Filter & Delivery Time Filter State
+  bool _isVegMode = false;
+  bool get isVegMode => _isVegMode;
+
+  int? _maxDeliveryTimeFilter;
+  int? get maxDeliveryTimeFilter => _maxDeliveryTimeFilter;
+
+  void toggleVegMode(bool value) {
+    _isVegMode = value;
+    notifyListeners();
+  }
+
+  void setMaxDeliveryTimeFilter(int? value) {
+    _maxDeliveryTimeFilter = value;
+    notifyListeners();
+  }
+
+  // Loyalty & Membership State
+  int _loyaltyPoints = 450;
+  int get loyaltyPoints => _loyaltyPoints;
+  String _vipMembership = 'Silver'; // Bronze, Silver, Gold, Platinum
+  String get vipMembership => _vipMembership;
+
+  // Membership Plans List
+  final List<MembershipPlan> _membershipPlans = [
+    MembershipPlan(
+      id: 'p1',
+      name: 'Gold VIP Plan',
+      price: '₹299 / month',
+      pointsMultiplier: '2.0x points on orders',
+      freeDelivery: 'Free delivery on all orders above ₹199',
+      discounts: 'Extra 10% discount on Bestsellers',
+    ),
+    MembershipPlan(
+      id: 'p2',
+      name: 'Silver VIP Plan',
+      price: '₹149 / month',
+      pointsMultiplier: '1.5x points on orders',
+      freeDelivery: 'Free delivery on all orders above ₹299',
+      discounts: 'Extra 5% discount on desserts & drinks',
+    ),
+    MembershipPlan(
+      id: 'p3',
+      name: 'Bronze VIP Plan',
+      price: '₹79 / month',
+      pointsMultiplier: '1.2x points on orders',
+      freeDelivery: 'Free delivery on orders above ₹399',
+      discounts: 'Special Bronze-only coupon codes',
+    ),
+  ];
+
+  List<MembershipPlan> get membershipPlans => _membershipPlans;
+
+  void addMembershipPlan(String name, String price, String multiplier, String delivery, String discount) {
+    _membershipPlans.insert(0, MembershipPlan(
+      id: 'p${DateTime.now().millisecondsSinceEpoch}',
+      name: name,
+      price: price,
+      pointsMultiplier: multiplier,
+      freeDelivery: delivery,
+      discounts: discount,
+    ));
+    notifyListeners();
+  }
+
+  // Coupon State
+  String? _appliedCouponCode;
+  String? get appliedCouponCode => _appliedCouponCode;
+
+  // Support Tickets State
+  final List<SupportTicket> _supportTickets = [
+    SupportTicket(
+      ticketNumber: 'TKT-9912',
+      subject: 'Refund for missing garlic naan',
+      category: 'Food Quality',
+      priority: 'Medium',
+      status: 'Resolved',
+      date: '17 July 2026',
+      assignedStaff: 'Emily Watson',
+      resolution: 'Refund of ₹40 has been credited to your Wallet.',
+      internalNotes: 'User complained about garlic naan missing. Refund processed.',
+      messages: ['Hi, my garlic naan was missing in order ORD-7612', 'Apologies for the inconvenience. We have refunded the amount to your wallet.'],
+    ),
+    SupportTicket(
+      ticketNumber: 'TKT-1082',
+      subject: 'Order delayed by 30 mins',
+      category: 'Order Delay',
+      priority: 'High',
+      status: 'Open',
+      date: 'Today',
+      assignedStaff: 'Rohan Sharma',
+      messages: ['My active order ORD-8742 is showing 12 mins left but it has been 45 mins.'],
+    ),
+  ];
+  List<SupportTicket> get supportTickets => _supportTickets;
+
+  // Device Sessions State
+  final List<DeviceSession> _deviceSessions = [
+    DeviceSession(id: 'd1', deviceName: 'iPhone 15 Pro Max', location: 'Springfield, USA', lastActive: 'Active Now', isCurrent: true),
+    DeviceSession(id: 'd2', deviceName: 'Chrome Browser (Windows 11)', location: 'New York, USA', lastActive: '2 hours ago'),
+    DeviceSession(id: 'd3', deviceName: 'iPad Air 5th Gen', location: 'Chicago, USA', lastActive: '3 days ago'),
+  ];
+  List<DeviceSession> get deviceSessions => _deviceSessions;
+
+  // Referral State
+  String _referralCode = 'FOODIE7612';
+  String get referralCode => _referralCode;
+
+  // Address CRUD operations
+  void selectAddress(Address address) {
+    _selectedAddress = address;
+    notifyListeners();
+  }
+
+  void addAddress(Address address) {
+    _addresses.add(address);
+    if (_selectedAddress == null) {
+      _selectedAddress = address;
+    }
+    notifyListeners();
+  }
+
+  void updateAddress(String id, Address newAddress) {
+    final index = _addresses.indexWhere((a) => a.id == id);
+    if (index != -1) {
+      _addresses[index] = newAddress;
+      if (_selectedAddress?.id == id) {
+        _selectedAddress = newAddress;
+      }
+      notifyListeners();
+    }
+  }
+
+  void deleteAddress(String id) {
+    _addresses.removeWhere((a) => a.id == id);
+    if (_selectedAddress?.id == id) {
+      _selectedAddress = _addresses.isNotEmpty ? _addresses.first : null;
+    }
+    notifyListeners();
+  }
+
+  // Wallet Operations
+  void addWalletMoney(double amount) {
+    _walletBalance += amount;
+    _walletTransactions.insert(0, WalletTransaction(
+      id: 'wt${DateTime.now().millisecondsSinceEpoch}',
+      title: 'Added via Card/UPI',
+      date: 'Today',
+      amount: amount,
+      isCredit: true,
+    ));
+    _loyaltyPoints += (amount * 0.1).toInt(); // 10% points on adding money
+    notifyListeners();
+  }
+
+  bool payWithWallet(double amount) {
+    if (_walletBalance >= amount) {
+      _walletBalance -= amount;
+      _walletTransactions.insert(0, WalletTransaction(
+        id: 'wt${DateTime.now().millisecondsSinceEpoch}',
+        title: 'Spent on Order',
+        date: 'Today',
+        amount: amount,
+        isCredit: false,
+      ));
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  // Coupon Operations
+  bool applyCoupon(String code) {
+    final uc = code.toUpperCase().trim();
+    if (uc == 'WELCOME50' || uc == 'FREEDEL') {
+      _appliedCouponCode = uc;
+      notifyListeners();
+      return true;
+    }
+    return false;
+  }
+
+  void removeCoupon() {
+    _appliedCouponCode = null;
+    notifyListeners();
+  }
+
+  // Loyalty & VIP Operations
+  void redeemLoyaltyPoints(int points) {
+    if (_loyaltyPoints >= points) {
+      _loyaltyPoints -= points;
+      final cashback = points / 10.0; // 10 points = 1 rupee cashback
+      _walletBalance += cashback;
+      _walletTransactions.insert(0, WalletTransaction(
+        id: 'wt${DateTime.now().millisecondsSinceEpoch}',
+        title: 'Loyalty Points Redeemed',
+        date: 'Today',
+        amount: cashback,
+        isCredit: true,
+      ));
+      notifyListeners();
+    }
+  }
+
+  void upgradeVipMembership(String plan) {
+    _vipMembership = plan;
+    notifyListeners();
+  }
+
+  // Support Tickets Operations
+  void addSupportTicket(String subject, String category, String priority, String description) {
+    final newTicket = SupportTicket(
+      ticketNumber: 'TKT-${1000 + _supportTickets.length}',
+      subject: subject,
+      category: category,
+      priority: priority,
+      status: 'Open',
+      date: 'Today',
+      messages: [description],
+    );
+    _supportTickets.insert(0, newTicket);
+    notifyListeners();
+  }
+
+  void replyToTicket(String ticketNumber, String message) {
+    final index = _supportTickets.indexWhere((t) => t.ticketNumber == ticketNumber);
+    if (index != -1) {
+      _supportTickets[index].messages.add(message);
+      notifyListeners();
+    }
+  }
+
+  // Device Management Operations
+  void logoutDevice(String id) {
+    _deviceSessions.removeWhere((d) => d.id == id);
+    notifyListeners();
+  }
+
+  void logoutAllDevices() {
+    _deviceSessions.removeWhere((d) => !d.isCurrent);
+    notifyListeners();
+  }
 
   // App Selection State
   String _selectedCategory = 'All';
@@ -104,6 +489,11 @@ class AppState extends ChangeNotifier {
 
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
+
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners();
+  }
 
   // Favorites (list of restaurant/food IDs)
   final Set<String> _favoriteRestaurantIds = {'r1'};
@@ -120,8 +510,7 @@ class AppState extends ChangeNotifier {
   List<String> tempAdditions = [];
   bool tempPackageBox = false;
 
-  // Mock data
-  final List<Restaurant> restaurants = [
+  final List<Restaurant> _restaurants = [
     Restaurant(
       id: 'r1',
       name: 'La Pasta House',
@@ -201,7 +590,7 @@ class AppState extends ChangeNotifier {
     ),
   ];
 
-  final List<FoodItem> foodItems = [
+  final List<FoodItem> _foodItems = [
     FoodItem(
       id: 'f8',
       restaurantId: 'r6',
@@ -437,6 +826,10 @@ class AppState extends ChangeNotifier {
     for (var add in additions) {
       if (add == 'Parmesan cheese') additionsCost += 2.50;
       if (add == 'Sauce') additionsCost += 1.50;
+      if (add == 'Extra Cheese') additionsCost += 30.00;
+      if (add == 'Extra Paneer/Tofu') additionsCost += 40.00;
+      if (add == 'Fresh Mushrooms') additionsCost += 25.00;
+      if (add == 'Spicy Jalapenos') additionsCost += 20.00;
     }
     double packageCost = packageBox ? 0.50 : 0.0;
 
@@ -499,6 +892,31 @@ class AppState extends ChangeNotifier {
 
   double get cartTotal {
     return cartSubtotal + deliveryFee;
+  }
+
+  // Getters with filtering
+  List<Restaurant> get restaurants {
+    List<Restaurant> list = _restaurants;
+    if (_isVegMode) {
+      // Filter out non-veg restaurants (e.g. r4 ramen/sushi, r6 tandoori curry could have non-veg, let's keep others)
+      list = list.where((r) => r.id != 'r4' && r.id != 'r6').toList();
+    }
+    if (_maxDeliveryTimeFilter != null) {
+      list = list.where((r) {
+        final timeParts = r.deliveryTime.split('-').first.replaceAll(RegExp(r'[^0-9]'), '');
+        final val = int.tryParse(timeParts) ?? 0;
+        return val <= _maxDeliveryTimeFilter!;
+      }).toList();
+    }
+    return list;
+  }
+
+  List<FoodItem> get foodItems {
+    List<FoodItem> list = _foodItems;
+    if (_isVegMode) {
+      list = list.where((f) => f.tags.any((t) => t.toLowerCase() == 'vegetarian' || t.toLowerCase() == 'veg')).toList();
+    }
+    return list;
   }
 }
 

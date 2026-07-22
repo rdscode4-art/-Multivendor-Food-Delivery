@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import 'signup_screen.dart';
 import 'reset_password_screen.dart';
 import 'main_container.dart';
+import 'verification_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,18 +17,52 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _phoneController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberMe = false;
   bool _isLoading = false;
+  bool _isOtpLogin = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
   void _handleLogin() async {
+    if (_isOtpLogin) {
+      final phone = _phoneController.text.trim();
+      if (phone.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter phone number')),
+        );
+        return;
+      }
+      setState(() {
+        _isLoading = true;
+      });
+      // Simulate OTP Send
+      await Future.delayed(const Duration(milliseconds: 600));
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VerificationScreen(
+            email: phone,
+            name: 'Guest User',
+            purpose: 'login',
+            initialOtp: '1234',
+          ),
+        ),
+      );
+      return;
+    }
+
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -193,132 +228,227 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // Email field
-                      const Text(
-                        'EMAIL',
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: const Color(0xFFF4F6F8),
-                          hintText: 'example@gmail.com',
-                          hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 14),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: AppTheme.orange, width: 1.5),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      
-                      // Password field
-                      const Text(
-                        'PASSWORD',
-                        style: TextStyle(
-                          color: AppTheme.textSecondary,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 1.0,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: _obscurePassword,
-                        style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: const Color(0xFFF4F6F8),
-                          hintText: '••••••••••••',
-                          hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 14),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                              color: AppTheme.textSecondary,
-                              size: 20,
-                            ),
-                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: AppTheme.orange, width: 1.5),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      
-                      // Remember me & Forgot Password
+                      // Login Mode Toggle Tabs
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: _rememberMe,
-                                activeColor: AppTheme.orange,
-                                checkColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _isOtpLogin = false),
+                              child: Container(
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: !_isOtpLogin ? AppTheme.orange : Colors.transparent,
+                                      width: 2.5,
+                                    ),
+                                  ),
                                 ),
-                                side: const BorderSide(color: AppTheme.border, width: 1.5),
-                                onChanged: (val) {
-                                  setState(() {
-                                    _rememberMe = val ?? false;
-                                  });
-                                },
+                                child: Text(
+                                  'EMAIL LOGIN',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: !_isOtpLogin ? AppTheme.orange : AppTheme.textSecondary,
+                                  ),
+                                ),
                               ),
-                              const Text(
-                                'Remember me',
-                                style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
-                              ),
-                            ],
+                            ),
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
-                              );
-                            },
-                            child: const Text(
-                              'Forgot Password',
-                              style: TextStyle(
-                                color: AppTheme.orange,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => setState(() => _isOtpLogin = true),
+                              child: Container(
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: _isOtpLogin ? AppTheme.orange : Colors.transparent,
+                                      width: 2.5,
+                                    ),
+                                  ),
+                                ),
+                                child: Text(
+                                  'MOBILE OTP',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: _isOtpLogin ? AppTheme.orange : AppTheme.textSecondary,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 24),
+
+                      if (_isOtpLogin) ...[
+                        const Text(
+                          'PHONE NUMBER',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFF4F6F8),
+                            hintText: '+91 9999999999',
+                            hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 14),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: AppTheme.orange, width: 1.5),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                      ] else ...[
+                        // Email field
+                        const Text(
+                          'EMAIL',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFF4F6F8),
+                            hintText: 'example@gmail.com',
+                            hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 14),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: AppTheme.orange, width: 1.5),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        
+                        // Password field
+                        const Text(
+                          'PASSWORD',
+                          style: TextStyle(
+                            color: AppTheme.textSecondary,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          style: const TextStyle(color: AppTheme.textPrimary, fontSize: 14),
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFF4F6F8),
+                            hintText: '••••••••••••',
+                            hintStyle: const TextStyle(color: AppTheme.textMuted, fontSize: 14),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                                color: AppTheme.textSecondary,
+                                size: 20,
+                              ),
+                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: const BorderSide(color: AppTheme.orange, width: 1.5),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        
+                        // Remember me & Forgot Password
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                Checkbox(
+                                  value: _rememberMe,
+                                  activeColor: AppTheme.orange,
+                                  checkColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  side: const BorderSide(color: AppTheme.border, width: 1.5),
+                                  onChanged: (val) {
+                                    setState(() {
+                                      _rememberMe = val ?? false;
+                                    });
+                                  },
+                                ),
+                                const Text(
+                                  'Remember me',
+                                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                                ),
+                              ],
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const ResetPasswordScreen()),
+                                );
+                              },
+                              child: const Text(
+                                'Forgot Password',
+                                style: TextStyle(
+                                  color: AppTheme.orange,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 24),
                       
                       // LOG IN Button (orange)

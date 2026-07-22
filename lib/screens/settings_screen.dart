@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import 'welcome_screen.dart';
+import 'wallet_screen.dart';
+import 'loyalty_membership_screen.dart';
+import 'address_management_screen.dart';
+import 'referral_screen.dart';
+import 'support_tickets_screen.dart';
+import 'device_management_screen.dart';
 import '../models/app_state.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -201,6 +207,83 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ]),
 
+              const SizedBox(height: 24),
+
+              // Section: Account Dashboards
+              _buildSectionHeader('Account Dashboards'),
+              _buildSettingsCard([
+                ListTile(
+                  leading: const Icon(Icons.account_balance_wallet_outlined, color: AppTheme.orange),
+                  title: const Text('My Wallet Cash', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.textSecondary),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const WalletScreen()),
+                    );
+                  },
+                ),
+                const Divider(height: 1, color: AppTheme.border),
+                ListTile(
+                  leading: const Icon(Icons.stars_outlined, color: AppTheme.orange),
+                  title: const Text('VIP & Loyalty Membership', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.textSecondary),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoyaltyMembershipScreen()),
+                    );
+                  },
+                ),
+                const Divider(height: 1, color: AppTheme.border),
+                ListTile(
+                  leading: const Icon(Icons.map_outlined, color: AppTheme.orange),
+                  title: const Text('Saved Delivery Addresses', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.textSecondary),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AddressManagementScreen(selectMode: false)),
+                    );
+                  },
+                ),
+                const Divider(height: 1, color: AppTheme.border),
+                ListTile(
+                  leading: const Icon(Icons.card_giftcard_outlined, color: AppTheme.orange),
+                  title: const Text('Refer & Earn ₹100', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.textSecondary),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ReferralScreen()),
+                    );
+                  },
+                ),
+                const Divider(height: 1, color: AppTheme.border),
+                ListTile(
+                  leading: const Icon(Icons.support_agent_outlined, color: AppTheme.orange),
+                  title: const Text('Support Ticket Desk', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.textSecondary),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SupportTicketsScreen()),
+                    );
+                  },
+                ),
+                const Divider(height: 1, color: AppTheme.border),
+                ListTile(
+                  leading: const Icon(Icons.devices_outlined, color: AppTheme.orange),
+                  title: const Text('Device Management & Logouts', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppTheme.textSecondary),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const DeviceManagementScreen()),
+                    );
+                  },
+                ),
+              ]),
               const SizedBox(height: 24),
 
               // Section 2: Notifications

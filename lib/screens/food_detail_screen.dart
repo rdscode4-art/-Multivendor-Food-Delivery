@@ -16,6 +16,14 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   int _quantity = 1;
   final List<String> _selectedAdditions = [];
   bool _packageBoxSelected = false;
+  final TextEditingController _customIngredientController = TextEditingController();
+  String _customIngredientText = '';
+
+  @override
+  void dispose() {
+    _customIngredientController.dispose();
+    super.dispose();
+  }
 
   void _toggleAddition(String add) {
     setState(() {
@@ -31,6 +39,10 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     double base = widget.foodItem.price;
     if (_selectedAdditions.contains('Parmesan cheese')) base += 2.50;
     if (_selectedAdditions.contains('Sauce')) base += 1.50;
+    if (_selectedAdditions.contains('Extra Cheese')) base += 30.00;
+    if (_selectedAdditions.contains('Extra Paneer/Tofu')) base += 40.00;
+    if (_selectedAdditions.contains('Fresh Mushrooms')) base += 25.00;
+    if (_selectedAdditions.contains('Spicy Jalapenos')) base += 20.00;
     if (_packageBoxSelected) base += 0.50;
     return base;
   }
@@ -178,7 +190,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
 
                     // Add more section
                     const Text(
-                      'Add more',
+                      'Add more & Ingredients',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
                     ),
                     const SizedBox(height: 12),
@@ -193,6 +205,56 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       r'+₹1.50',
                       _selectedAdditions.contains('Sauce'),
                       () => _toggleAddition('Sauce'),
+                    ),
+                    _buildCustomOption(
+                      'Extra Cheese',
+                      r'+₹30.00',
+                      _selectedAdditions.contains('Extra Cheese'),
+                      () => _toggleAddition('Extra Cheese'),
+                    ),
+                    _buildCustomOption(
+                      'Extra Paneer/Tofu',
+                      r'+₹40.00',
+                      _selectedAdditions.contains('Extra Paneer/Tofu'),
+                      () => _toggleAddition('Extra Paneer/Tofu'),
+                    ),
+                    _buildCustomOption(
+                      'Fresh Mushrooms',
+                      r'+₹25.00',
+                      _selectedAdditions.contains('Fresh Mushrooms'),
+                      () => _toggleAddition('Fresh Mushrooms'),
+                    ),
+                    _buildCustomOption(
+                      'Spicy Jalapenos',
+                      r'+₹20.00',
+                      _selectedAdditions.contains('Spicy Jalapenos'),
+                      () => _toggleAddition('Spicy Jalapenos'),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Custom instructions/ingredient adder
+                    const Text(
+                      'Custom Ingredient / Note',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.textSecondary),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _customIngredientController,
+                      decoration: InputDecoration(
+                        hintText: 'e.g. Extra spicy, No onions, Add extra oregano...',
+                        hintStyle: const TextStyle(fontSize: 13, color: AppTheme.textMuted),
+                        filled: true,
+                        fillColor: AppTheme.background,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      style: const TextStyle(fontSize: 14, color: AppTheme.textPrimary),
+                      onChanged: (val) {
+                        _customIngredientText = val;
+                      },
                     ),
                     const SizedBox(height: 24),
 
@@ -275,10 +337,14 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
+                        final additions = List<String>.from(_selectedAdditions);
+                        if (_customIngredientText.trim().isNotEmpty) {
+                          additions.add('Instruction: ${_customIngredientText.trim()}');
+                        }
                         state.addToCart(
                           food,
                           _quantity,
-                          _selectedAdditions,
+                          additions,
                           _packageBoxSelected,
                         );
                         ScaffoldMessenger.of(context).showSnackBar(

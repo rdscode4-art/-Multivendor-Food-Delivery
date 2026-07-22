@@ -8,6 +8,7 @@ import 'payment_methods_screen.dart';
 import 'contact_us_screen.dart';
 import 'settings_screen.dart';
 import 'help_faq_screen.dart';
+import 'loyalty_membership_screen.dart';
 import '../widgets/levitating_3d_avatar.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -134,6 +135,17 @@ class ProfileScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const OrderHistoryScreen()),
+                  );
+                },
+              ),
+              _buildMenuItem(
+                icon: Icons.stars_outlined,
+                title: 'VIP & Loyalty Membership',
+                subtitle: 'Redeem points, check VIP plans',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoyaltyMembershipScreen()),
                   );
                 },
               ),

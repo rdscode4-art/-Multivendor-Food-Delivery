@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import '../models/app_state.dart';
 import '../services/api_service.dart';
 import 'main_container.dart';
+import 'new_password_screen.dart';
 
 class VerificationScreen extends StatefulWidget {
   final String email;
@@ -91,7 +92,15 @@ class _VerificationScreenState extends State<VerificationScreen> {
       );
       
       if (widget.isPasswordReset) {
-        Navigator.popUntil(context, (route) => route.isFirst);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => NewPasswordScreen(
+              email: widget.email,
+              code: verificationCode,
+            ),
+          ),
+        );
       } else {
         AppStateProvider.of(context, listen: false).login(widget.email, widget.name);
         Navigator.pushAndRemoveUntil(
@@ -206,10 +215,33 @@ class _VerificationScreenState extends State<VerificationScreen> {
                         style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('A new code has been sent!')),
-                          );
+                        onTap: () async {
+                          try {
+                            final actualPurpose = widget.isPasswordReset ? 'reset_password' : widget.purpose;
+                            final responseData = await ApiService.instance.resendOtp(
+                              email: widget.email,
+                              purpose: actualPurpose,
+                            );
+                            String? code;
+                            if (responseData is Map) {
+                              code = responseData['code']?.toString() ?? responseData['otp']?.toString();
+                            }
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(code != null ? 'A new code has been sent ($code)!' : 'A new code has been sent!'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } catch (e) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to resend OTP: ${e.toString()}'),
+                                backgroundColor: Colors.redAccent,
+                              ),
+                            );
+                          }
                         },
                         child: const Text(
                           'Resend',

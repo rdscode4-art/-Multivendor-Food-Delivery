@@ -89,6 +89,20 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                           ),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.verified, color: Colors.blue, size: 20),
+                      const SizedBox(width: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade100,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'FSSAI',
+                          style: TextStyle(color: Colors.green.shade800, fontSize: 10, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -110,6 +124,52 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       _buildHeaderMeta(Icons.access_time, AppTheme.orange, rest.deliveryTime),
                       _buildHeaderMeta(Icons.delivery_dining, Colors.green, '₹${rest.deliveryFee.toStringAsFixed(2)} Delivery'),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppTheme.border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: const [
+                            Icon(Icons.schedule, color: AppTheme.orange, size: 16),
+                            SizedBox(width: 6),
+                            Text(
+                              'Hours: 9:00 AM - 11:00 PM (Open Now)',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: const [
+                            Icon(Icons.phone, color: AppTheme.orange, size: 16),
+                            SizedBox(width: 6),
+                            Text(
+                              'Contact: +91 98765 43210',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: const [
+                            Icon(Icons.info_outline, color: AppTheme.orange, size: 16),
+                            SizedBox(width: 6),
+                            Text(
+                              'Min. Order: ₹100.00  •  Verified Safety Standards',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   const Divider(color: AppTheme.border, height: 32),
 
@@ -226,13 +286,43 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        item.name,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
-                                          color: AppTheme.textPrimary,
-                                        ),
+                                      Row(
+                                        children: [
+                                          _buildVegIndicator(item),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              item.name,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                                color: AppTheme.textPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          if (item.name == 'Pesto pasta' || item.name == 'Butter Chicken & Naan' || item.name == 'Masala Dosa')
+                                            Container(
+                                              margin: const EdgeInsets.only(right: 6, top: 4),
+                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AppTheme.orangeLight,
+                                                borderRadius: BorderRadius.circular(4),
+                                              ),
+                                              child: const Text(
+                                                '★ Bestseller',
+                                                style: TextStyle(color: AppTheme.orange, fontSize: 8, fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                          if (item.name.toLowerCase().contains('spicy') || item.description.toLowerCase().contains('spicy') || item.description.toLowerCase().contains('chili'))
+                                            const Padding(
+                                              padding: EdgeInsets.only(top: 4.0),
+                                              child: Text('🌶️ Spicy', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.red)),
+                                            ),
+                                        ],
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
@@ -304,6 +394,27 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildVegIndicator(FoodItem item) {
+    final isVeg = item.tags.any((t) => t.toLowerCase() == 'vegetarian' || t.toLowerCase() == 'veg');
+    return Container(
+      width: 14,
+      height: 14,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        border: Border.all(color: isVeg ? Colors.green : Colors.red, width: 1.5),
+        borderRadius: BorderRadius.circular(3),
+      ),
+      child: Container(
+        width: 6,
+        height: 6,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isVeg ? Colors.green : Colors.red,
+        ),
+      ),
     );
   }
 }
